@@ -1,0 +1,506 @@
+@page
+@model IndexModel
+@using Efac.Domain.Enums
+@{
+    ViewData["Title"] = "Clientes";
+}
+
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] - EFAC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --page-bg: #f6f7f9;
+            --ink: #1f2933;
+            --muted: #64748b;
+            --line: #d8dee8;
+            --accent: #0f766e;
+            --danger: #b42318;
+        }
+
+        body {
+            background: var(--page-bg);
+            color: var(--ink);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 32px 18px;
+        }
+
+        .app-title {
+            font-size: 1.45rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) auto;
+            gap: 12px;
+            align-items: center;
+            margin: 22px 0 16px;
+        }
+
+        .table-wrap {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            color: var(--muted);
+            font-size: .78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+            justify-content: flex-end;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            display: inline-grid;
+            place-items: center;
+            border-radius: 6px;
+        }
+
+        .dv-pill {
+            min-width: 44px;
+            display: inline-flex;
+            justify-content: center;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 3px 10px;
+            font-weight: 700;
+            color: var(--accent);
+            background: #f0fdfa;
+        }
+
+        .empty-state {
+            padding: 42px 16px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .field-group[hidden] {
+            display: none !important;
+        }
+
+        @@media (max-width: 720px) {
+            .toolbar {
+                grid-template-columns: 1fr;
+            }
+
+            .app-shell {
+                padding: 22px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="app-shell">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <h1 class="app-title">Clientes EFAC</h1>
+                <div class="text-secondary">CRUD DIAN</div>
+            </div>
+            <a class="btn btn-outline-secondary" href="/swagger" target="_blank" rel="noreferrer">Swagger</a>
+        </div>
+
+        <div class="toolbar">
+            <input id="input-search" class="form-control" type="search" placeholder="Buscar por NIT o nombre">
+            <button id="btn-new-client" class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#cliente-modal">
+                Nuevo Cliente
+            </button>
+        </div>
+
+        <div id="validation-summary" class="alert alert-danger d-none" role="alert"></div>
+
+        <section class="table-wrap">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Identificacion</th>
+                            <th>DV</th>
+                            <th>Nombre/Razon Social</th>
+                            <th>Ciudad</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientes-table-body"></tbody>
+                </table>
+            </div>
+            <div id="empty-state" class="empty-state d-none">No hay clientes para mostrar.</div>
+        </section>
+    </main>
+
+    <div class="modal fade" id="cliente-modal" tabindex="-1" aria-labelledby="cliente-modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <form id="cliente-form" novalidate>
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="cliente-modal-title">Nuevo Cliente</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="form-validation-summary" class="alert alert-danger d-none" role="alert"></div>
+                        <input id="input-id" type="hidden">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.TipoPersona" class="form-label">Tipo de persona</label>
+                                <select asp-for="Input.TipoPersona" id="input-tipo-persona" class="form-select">
+                                    <option value="@((int)TipoPersona.Natural)">Natural</option>
+                                    <option value="@((int)TipoPersona.Juridica)">Juridica</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Input.Nit" class="form-label">NIT</label>
+                                <input asp-for="Input.Nit" id="input-nit" class="form-control" inputmode="numeric" autocomplete="off">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label" for="input-dv">DV</label>
+                                <input id="input-dv" class="form-control" readonly>
+                            </div>
+
+                            <div class="col-md-6 field-group" data-persona="natural">
+                                <label asp-for="Input.Nombres" class="form-label">Nombres</label>
+                                <input asp-for="Input.Nombres" id="input-nombres" class="form-control" autocomplete="given-name">
+                            </div>
+                            <div class="col-md-6 field-group" data-persona="natural">
+                                <label asp-for="Input.Apellidos" class="form-label">Apellidos</label>
+                                <input asp-for="Input.Apellidos" id="input-apellidos" class="form-control" autocomplete="family-name">
+                            </div>
+                            <div class="col-md-6 field-group" data-persona="natural">
+                                <label asp-for="Input.FechaNacimiento" class="form-label">Fecha de nacimiento</label>
+                                <input asp-for="Input.FechaNacimiento" id="input-fecha-nacimiento" class="form-control" type="date">
+                            </div>
+                            <div class="col-12 field-group" data-persona="juridica" hidden>
+                                <label asp-for="Input.RazonSocial" class="form-label">Razon social</label>
+                                <input asp-for="Input.RazonSocial" id="input-razon-social" class="form-control" autocomplete="organization">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Input.Email" class="form-label">Email</label>
+                                <input asp-for="Input.Email" id="input-email" class="form-control" type="email" autocomplete="email">
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.Telefono" class="form-label">Telefono</label>
+                                <input asp-for="Input.Telefono" id="input-telefono" class="form-control" autocomplete="tel">
+                            </div>
+                            <div class="col-md-8">
+                                <label asp-for="Input.Direccion" class="form-label">Direccion</label>
+                                <input asp-for="Input.Direccion" id="input-direccion" class="form-control" autocomplete="street-address">
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Input.CiudadCodigoMunicipio" class="form-label">Ciudad</label>
+                                <input asp-for="Input.CiudadCodigoMunicipio" id="input-ciudad" class="form-control" placeholder="11001">
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.ResponsabilidadFiscal" class="form-label">Responsabilidad fiscal</label>
+                                <select asp-for="Input.ResponsabilidadFiscal" id="input-responsabilidad" class="form-select">
+                                    <option value="@((int)ResponsabilidadFiscal.ResponsableIva)">Responsable IVA</option>
+                                    <option value="@((int)ResponsabilidadFiscal.NoResponsableIva)">No responsable IVA</option>
+                                    <option value="@((int)ResponsabilidadFiscal.RegimenSimple)">Regimen simple</option>
+                                    <option value="@((int)ResponsabilidadFiscal.GranContribuyente)">Gran contribuyente</option>
+                                    <option value="@((int)ResponsabilidadFiscal.Autorretenedor)">Autorretenedor</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button id="btn-save-client" type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const state = {
+            clientes: [],
+            editingId: null
+        };
+
+        const tipoPersona = {
+            natural: 1,
+            juridica: 2
+        };
+
+        const elements = {
+            tableBody: document.getElementById('clientes-table-body'),
+            emptyState: document.getElementById('empty-state'),
+            search: document.getElementById('input-search'),
+            summary: document.getElementById('validation-summary'),
+            formSummary: document.getElementById('form-validation-summary'),
+            form: document.getElementById('cliente-form'),
+            modalTitle: document.getElementById('cliente-modal-title'),
+            modal: document.getElementById('cliente-modal'),
+            newButton: document.getElementById('btn-new-client'),
+            id: document.getElementById('input-id'),
+            tipoPersona: document.getElementById('input-tipo-persona'),
+            nit: document.getElementById('input-nit'),
+            dv: document.getElementById('input-dv'),
+            nombres: document.getElementById('input-nombres'),
+            apellidos: document.getElementById('input-apellidos'),
+            razonSocial: document.getElementById('input-razon-social'),
+            fechaNacimiento: document.getElementById('input-fecha-nacimiento'),
+            email: document.getElementById('input-email'),
+            telefono: document.getElementById('input-telefono'),
+            direccion: document.getElementById('input-direccion'),
+            ciudad: document.getElementById('input-ciudad'),
+            responsabilidad: document.getElementById('input-responsabilidad')
+        };
+
+        const modal = new bootstrap.Modal(elements.modal);
+
+        document.addEventListener('DOMContentLoaded', loadClientes);
+        elements.search.addEventListener('input', renderTable);
+        elements.newButton.addEventListener('click', openCreate);
+        elements.tipoPersona.addEventListener('change', syncPersonaFields);
+        elements.nit.addEventListener('input', debounce(calculateDv, 250));
+        elements.form.addEventListener('submit', saveCliente);
+
+        async function loadClientes() {
+            hideSummary(elements.summary);
+            try {
+                const response = await fetch('/api/clientes');
+                await ensureSuccess(response);
+                state.clientes = await response.json();
+                renderTable();
+            } catch (error) {
+                showSummary(elements.summary, error.message);
+            }
+        }
+
+        function renderTable() {
+            const query = elements.search.value.trim().toLowerCase();
+            const rows = state.clientes.filter(cliente => {
+                const nombre = (cliente.nombreCompleto ?? '').toLowerCase();
+                const nit = (cliente.nit ?? '').toLowerCase();
+                return !query || nombre.includes(query) || nit.includes(query);
+            });
+
+            elements.tableBody.innerHTML = rows.map(cliente => `
+                <tr>
+                    <td>${escapeHtml(cliente.nit)}</td>
+                    <td><span class="dv-pill">${cliente.dv}</span></td>
+                    <td>${escapeHtml(cliente.nombreCompleto)}</td>
+                    <td>${escapeHtml(cliente.ciudadCodigoMunicipio)}</td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-outline-secondary icon-btn" type="button" title="Ver" aria-label="Ver" onclick="openDetails('${cliente.id}')">👁</button>
+                            <button class="btn btn-outline-primary icon-btn" type="button" title="Editar" aria-label="Editar" onclick="openEdit('${cliente.id}')">✎</button>
+                            <button class="btn btn-outline-danger icon-btn" type="button" title="Eliminar" aria-label="Eliminar" onclick="deleteCliente('${cliente.id}')">⌫</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            elements.emptyState.classList.toggle('d-none', rows.length > 0);
+        }
+
+        function openCreate() {
+            state.editingId = null;
+            elements.modalTitle.textContent = 'Nuevo Cliente';
+            elements.form.reset();
+            elements.id.value = '';
+            elements.dv.value = '';
+            elements.tipoPersona.value = String(tipoPersona.natural);
+            hideSummary(elements.formSummary);
+            syncPersonaFields();
+        }
+
+        function openEdit(id) {
+            const cliente = state.clientes.find(item => item.id === id);
+            if (!cliente) {
+                return;
+            }
+
+            state.editingId = id;
+            elements.modalTitle.textContent = 'Editar Cliente';
+            fillForm(cliente);
+            hideSummary(elements.formSummary);
+            modal.show();
+        }
+
+        function openDetails(id) {
+            const cliente = state.clientes.find(item => item.id === id);
+            if (!cliente) {
+                return;
+            }
+
+            state.editingId = id;
+            elements.modalTitle.textContent = 'Ver Cliente';
+            fillForm(cliente);
+            hideSummary(elements.formSummary);
+            modal.show();
+        }
+
+        function fillForm(cliente) {
+            elements.id.value = cliente.id;
+            elements.tipoPersona.value = String(cliente.tipoPersona);
+            elements.nit.value = cliente.nit ?? '';
+            elements.dv.value = cliente.dv ?? '';
+            elements.nombres.value = cliente.nombres ?? '';
+            elements.apellidos.value = cliente.apellidos ?? '';
+            elements.razonSocial.value = cliente.razonSocial ?? '';
+            elements.fechaNacimiento.value = cliente.fechaNacimiento ?? '';
+            elements.email.value = cliente.email ?? '';
+            elements.telefono.value = cliente.telefono ?? '';
+            elements.direccion.value = cliente.direccion ?? '';
+            elements.ciudad.value = cliente.ciudadCodigoMunicipio ?? '';
+            elements.responsabilidad.value = String(cliente.responsabilidadFiscal);
+            syncPersonaFields();
+        }
+
+        async function saveCliente(event) {
+            event.preventDefault();
+            hideSummary(elements.formSummary);
+
+            const payload = buildPayload();
+            const isEdit = Boolean(state.editingId);
+            const url = isEdit ? `/api/clientes/${state.editingId}` : '/api/clientes';
+            const method = isEdit ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                await ensureSuccess(response);
+                modal.hide();
+                await loadClientes();
+            } catch (error) {
+                showSummary(elements.formSummary, error.message);
+            }
+        }
+
+        async function deleteCliente(id) {
+            const cliente = state.clientes.find(item => item.id === id);
+            const nombre = cliente?.nombreCompleto ?? 'este cliente';
+            if (!confirm(`Eliminar ${nombre}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/clientes/${id}`, { method: 'DELETE' });
+                await ensureSuccess(response);
+                await loadClientes();
+            } catch (error) {
+                showSummary(elements.summary, error.message);
+            }
+        }
+
+        async function calculateDv() {
+            const nit = elements.nit.value.trim();
+            elements.dv.value = '';
+            if (!nit) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/clientes/calcular-dv/${encodeURIComponent(nit)}`);
+                await ensureSuccess(response);
+                const result = await response.json();
+                elements.nit.value = result.nit;
+                elements.dv.value = result.dv;
+            } catch {
+                elements.dv.value = '';
+            }
+        }
+
+        function buildPayload() {
+            const selectedTipo = Number(elements.tipoPersona.value);
+            const isNatural = selectedTipo === tipoPersona.natural;
+
+            return {
+                tipoPersona: selectedTipo,
+                nit: elements.nit.value,
+                nombres: isNatural ? elements.nombres.value : null,
+                apellidos: isNatural ? elements.apellidos.value : null,
+                razonSocial: isNatural ? null : elements.razonSocial.value,
+                fechaNacimiento: isNatural ? elements.fechaNacimiento.value || null : null,
+                email: elements.email.value,
+                telefono: elements.telefono.value,
+                direccion: elements.direccion.value,
+                ciudadCodigoMunicipio: elements.ciudad.value,
+                responsabilidadFiscal: Number(elements.responsabilidad.value)
+            };
+        }
+
+        function syncPersonaFields() {
+            const isNatural = Number(elements.tipoPersona.value) === tipoPersona.natural;
+            document.querySelectorAll('[data-persona="natural"]').forEach(group => group.hidden = !isNatural);
+            document.querySelectorAll('[data-persona="juridica"]').forEach(group => group.hidden = isNatural);
+            elements.nombres.disabled = !isNatural;
+            elements.apellidos.disabled = !isNatural;
+            elements.fechaNacimiento.disabled = !isNatural;
+            elements.razonSocial.disabled = isNatural;
+        }
+
+        async function ensureSuccess(response) {
+            if (response.ok) {
+                return;
+            }
+
+            let message = 'No fue posible completar la operacion';
+            try {
+                const body = await response.json();
+                message = body.error ?? body.title ?? message;
+            } catch {
+                message = `${message} (${response.status})`;
+            }
+
+            throw new Error(message);
+        }
+
+        function showSummary(target, message) {
+            target.textContent = message;
+            target.classList.remove('d-none');
+        }
+
+        function hideSummary(target) {
+            target.textContent = '';
+            target.classList.add('d-none');
+        }
+
+        function debounce(callback, delay) {
+            let timeoutId;
+            return (...args) => {
+                window.clearTimeout(timeoutId);
+                timeoutId = window.setTimeout(() => callback(...args), delay);
+            };
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+    </script>
+</body>
+</html>

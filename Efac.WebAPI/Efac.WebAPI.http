@@ -1,0 +1,30 @@
+@Efac.WebAPI_HostAddress = http://localhost:5100
+
+GET {{Efac.WebAPI_HostAddress}}/api/clientes
+Accept: application/json
+
+###
+
+GET {{Efac.WebAPI_HostAddress}}/api/clientes/calcular-dv/900373913
+Accept: application/json
+
+###
+
+POST {{Efac.WebAPI_HostAddress}}/api/clientes
+Content-Type: application/json
+
+{
+  "tipoPersona": 1,
+  "nit": "1010101010",
+  "nombres": "Carlos",
+  "apellidos": "Perez",
+  "razonSocial": null,
+  "fechaNacimiento": "1991-05-20",
+  "email": "carlos.perez@example.com",
+  "telefono": "3105559090",
+  "direccion": "Calle 26 # 50-20",
+  "ciudadCodigoMunicipio": "11001",
+  "responsabilidadFiscal": 2
+}
+
+###
