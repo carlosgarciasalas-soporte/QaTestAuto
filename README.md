@@ -198,6 +198,30 @@ Prueba Selenium inicial:
 
 - Smoke test de carga de controles principales, activable mediante variable de entorno.
 
+### Etapa 2 - Pruebas Automatizadas De API
+
+Estado: implementada.
+
+Incluye pruebas automatizadas para:
+
+- Disponibilidad de `GET /api/clientes`.
+- Consulta de cliente inexistente con `404 Not Found`.
+- Calculo de DV con NIT formateado.
+- Rechazo de NIT invalido con `400 Bad Request`.
+- Creacion valida de persona natural con `201 Created`.
+- Rechazo de NIT duplicado con `409 Conflict`.
+- Rechazo de persona natural menor de edad.
+- Rechazo de persona natural sin fecha de nacimiento.
+- Rechazo de persona juridica sin razon social.
+- Actualizacion valida de cliente.
+- Eliminacion valida de cliente y verificacion posterior de `404 Not Found`.
+
+Resultado actual de la suite:
+
+- `Efac.Tests.Api`: 11 pruebas automatizadas superadas.
+- `Efac.Tests.Selenium`: 1 prueba smoke superada.
+- Total: 12 pruebas superadas.
+
 ## Ejecucion Del Proyecto
 
 Restaurar dependencias:
@@ -244,20 +268,6 @@ test-assets/evidence/reports
 Estas carpetas estan preparadas para capturas de pantalla, reportes y registros de ejecucion. Los archivos generados no deben versionarse salvo que sean evidencias finales requeridas por el equipo.
 
 ## Roadmap Tecnico
-
-### Etapa 2 - Ampliacion De Pruebas API
-
-Casos recomendados:
-
-- Cliente inexistente retorna `404 Not Found`.
-- Calculo de DV retorna `200 OK`.
-- NIT invalido retorna `400 Bad Request`.
-- Creacion valida retorna `201 Created`.
-- Persona natural menor de edad retorna `400 Bad Request`.
-- Persona natural sin fecha retorna `400 Bad Request`.
-- Persona juridica sin razon social retorna `400 Bad Request`.
-- Actualizacion valida retorna `200 OK`.
-- Eliminacion retorna `204 No Content`.
 
 ### Etapa 3 - Automatizacion UI Con Selenium
 

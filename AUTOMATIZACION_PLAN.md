@@ -60,17 +60,22 @@ $env:EFAC_BASE_URL="http://localhost:5100/"
 dotnet test Efac.Tests.Selenium --no-build
 ```
 
-## Etapa 2 - Pruebas API recomendadas
+## Etapa 2 - Pruebas API
+
+Estado: implementada.
+
+Incluye:
 
 - Cliente inexistente retorna `404 Not Found`.
-- Calculo DV retorna `200 OK`.
+- Calculo DV con NIT formateado retorna `200 OK`, NIT normalizado y DV.
 - NIT invalido retorna `400 Bad Request`.
-- Creacion valida retorna `201 Created`.
+- Creacion valida de persona natural retorna `201 Created`.
+- NIT duplicado retorna `409 Conflict`.
 - Menor de edad retorna `400 Bad Request`.
 - Persona natural sin fecha retorna `400 Bad Request`.
 - Persona juridica sin razon social retorna `400 Bad Request`.
 - Actualizacion valida retorna `200 OK`.
-- Eliminacion retorna `204 No Content`.
+- Eliminacion retorna `204 No Content` y el cliente queda inaccesible.
 
 ## Etapa 3 - Selenium recomendado
 
