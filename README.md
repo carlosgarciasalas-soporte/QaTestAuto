@@ -444,6 +444,71 @@ test-assets/evidence/reports
 
 Estas carpetas estan preparadas para capturas de pantalla, reportes y registros de ejecucion. Los archivos generados no deben versionarse salvo que sean evidencias finales requeridas por el equipo.
 
+### Evidencias Incluidas En El Repositorio
+
+El repositorio visible en GitHub deja evidencia de tres tipos: codigo, capturas sugeridas y resultados automatizados.
+
+#### 1. Evidencia De Codigo
+
+| Evidencia | Ubicacion | Que demuestra |
+|---|---|---|
+| Pruebas API | `Efac.Tests.Api/ClientesApiTests.cs` | Validacion automatizada de endpoints, codigos HTTP y reglas de negocio. |
+| Pruebas UI Selenium | `Efac.Tests.Selenium/Tests/ClientesUiSmokeTests.cs` | Flujos de navegador: carga, busqueda, creacion, duplicado, menor de edad, edicion y eliminacion. |
+| Page Object | `Efac.Tests.Selenium/Pages/ClientesPage.cs` | Reutilizacion de selectores, acciones de formulario, busqueda, edicion y eliminacion. |
+| Configuracion Selenium | `Efac.Tests.Selenium/Infrastructure/WebDriverFactory.cs` | Ejecucion de Chrome visible o headless. |
+| Configuracion de ejecucion | `Efac.Tests.Selenium/Infrastructure/SeleniumTestSettings.cs` | Variables `EFAC_RUN_SELENIUM`, `EFAC_BASE_URL` y `EFAC_SELENIUM_HEADLESS`. |
+| Script de entrega | `run-qa-tests.bat` | Punto de entrada para ejecutar el ciclo QA desde Windows. |
+| Script de automatizacion | `run-qa-tests.ps1` | Restore, build, WebAPI, Selenium, suite completa, logs y reportes. |
+| Matriz QA | `QA_Matriz_Evidencias_Pruebas.md` | Trazabilidad entre requisitos, casos, campos, resultados esperados y evidencias. |
+
+#### 2. Evidencia De Capturas
+
+Las capturas no se versionan por defecto para evitar ruido en el repositorio, pero la documentacion indica exactamente cuales tomar durante la ejecucion:
+
+| Captura | Momento recomendado |
+|---|---|
+| Inicio del script | Cuando aparezca `EFAC - EJECUCION QA AUTOMATICA`. |
+| Build correcto | Cuando aparezca `Compilacion correcta`. |
+| Pruebas API | Cuando aparezca `Superado: 11`. |
+| Selenium visible | Mientras Chrome llena formularios, busca, edita y elimina clientes. |
+| Pruebas Selenium | Cuando aparezca `Superado: 10`. |
+| Resumen final | Cuando aparezcan todas las etapas en `OK`. |
+| Carpeta de evidencias | Al abrir la ruta indicada en `Reportes TRX`. |
+
+Ruta sugerida para guardar capturas finales:
+
+```text
+test-assets/evidence/screenshots
+```
+
+#### 3. Evidencia De Resultados
+
+Cada ejecucion del script genera resultados en:
+
+```text
+test-assets/evidence/reports/yyyyMMdd_HHmmss_qa-run
+```
+
+Archivos esperados:
+
+| Archivo | Que evidencia |
+|---|---|
+| `qa-execution.log` | Registro completo de comandos ejecutados y resultado por etapa. |
+| `api-tests.trx` | Resultado formal de las 11 pruebas API. |
+| `selenium-tests.trx` | Resultado formal de las 10 pruebas Selenium. |
+| `*.trx` adicionales | Resultados de la suite completa sobre todos los proyectos de prueba. |
+| `webapi.log` | Salida de la WebAPI durante la ejecucion automatizada. |
+
+Resumen esperado de una ejecucion satisfactoria:
+
+```text
+Restore: OK
+Build: OK
+Pruebas API: OK
+Pruebas Selenium: OK
+Suite completa: OK
+```
+
 ## Roadmap Tecnico
 
 ### Etapa 5 - Flujos UI CRUD Con Selenium Visible

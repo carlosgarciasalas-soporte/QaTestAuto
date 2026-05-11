@@ -391,6 +391,11 @@ Codigo esperado: `400 Bad Request`.
 | EV-014 | Captura de carpeta generada en `test-assets/evidence/reports`. | Pendiente |
 | EV-015 | Archivo `qa-execution.log` generado por el script. | Pendiente |
 | EV-016 | Archivos `.trx` generados por `dotnet test`. | Pendiente |
+| EV-017 | Codigo de pruebas API en `Efac.Tests.Api/ClientesApiTests.cs`. | Incluido en repo |
+| EV-018 | Codigo de pruebas Selenium en `Efac.Tests.Selenium/Tests/ClientesUiSmokeTests.cs`. | Incluido en repo |
+| EV-019 | Page Object `Efac.Tests.Selenium/Pages/ClientesPage.cs`. | Incluido en repo |
+| EV-020 | Script `run-qa-tests.bat` para ejecucion automatica. | Incluido en repo |
+| EV-021 | Script `run-qa-tests.ps1` para logs, WebAPI y reportes. | Incluido en repo |
 
 ---
 
@@ -455,6 +460,39 @@ Archivos esperados:
 | `selenium-tests.trx` | Reporte formal de pruebas Selenium. |
 | `*.trx` adicionales | Reportes de la suite completa cuando se ejecutan varios proyectos. |
 | `webapi.log` | Salida de la WebAPI durante la ejecucion automatizada. |
+
+### 4.1 Evidencia Visible En GitHub
+
+Ademas de los archivos generados durante cada ejecucion, el repositorio contiene evidencia permanente de la implementacion:
+
+| Tipo | Archivo | Evidencia |
+|---|---|---|
+| Codigo | `Efac.Tests.Api/ClientesApiTests.cs` | Casos automatizados API y reglas de negocio. |
+| Codigo | `Efac.Tests.Selenium/Tests/ClientesUiSmokeTests.cs` | Casos automatizados UI: busqueda, creacion, duplicados, menor de edad, edicion y eliminacion. |
+| Codigo | `Efac.Tests.Selenium/Pages/ClientesPage.cs` | Page Object con acciones reutilizables de navegador. |
+| Codigo | `Efac.Tests.Selenium/Infrastructure/WebDriverFactory.cs` | Configuracion de Chrome visible/headless. |
+| Codigo | `run-qa-tests.bat` | Ejecucion desde Windows y pausa final para capturas. |
+| Codigo | `run-qa-tests.ps1` | Orquestacion completa: restore, build, API, WebAPI, Selenium, logs y TRX. |
+| Documentacion | `README.md` | Guia de implementacion, ejecucion y evidencias. |
+| Documentacion | `AUTOMATIZACION_PLAN.md` | Plan por etapas y cobertura automatizada. |
+| Documentacion | `QA_Matriz_Evidencias_Pruebas.md` | Matriz de trazabilidad y checklist de evidencias. |
+
+### 4.2 Evidencia De Capturas Recomendadas
+
+Durante la ejecucion de `run-qa-tests.bat`, se recomienda tomar capturas de:
+
+1. Inicio de ejecucion con el encabezado `EFAC - EJECUCION QA AUTOMATICA`.
+2. Compilacion correcta.
+3. Resultado API con `Superado: 11`.
+4. Chrome visible ejecutando Selenium sobre la interfaz.
+5. Formulario de cliente siendo diligenciado.
+6. Mensaje de error por NIT duplicado.
+7. Mensaje de error por menor de edad.
+8. Edicion de cliente desde la tabla.
+9. Eliminacion de cliente con confirmacion.
+10. Resultado Selenium con `Superado: 10`.
+11. Resumen final con todas las etapas en `OK`.
+12. Carpeta de evidencias generada en `test-assets/evidence/reports`.
 
 ### 5. Casos Automaticos Cubiertos
 
