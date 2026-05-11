@@ -386,7 +386,7 @@ Codigo esperado: `400 Bad Request`.
 | EV-009 | Captura de inicio del script `run-qa-tests.bat`. | Pendiente |
 | EV-010 | Captura de compilacion correcta desde consola. | Pendiente |
 | EV-011 | Captura de pruebas API superadas: `Superado: 11`. | Pendiente |
-| EV-012 | Captura de pruebas Selenium superadas: `Superado: 4`. | Pendiente |
+| EV-012 | Captura de pruebas Selenium superadas: `Superado: 10`. | Pendiente |
 | EV-013 | Captura del resumen final del script con todas las etapas en `OK`. | Pendiente |
 | EV-014 | Captura de carpeta generada en `test-assets/evidence/reports`. | Pendiente |
 | EV-015 | Archivo `qa-execution.log` generado por el script. | Pendiente |
@@ -432,7 +432,7 @@ El archivo `.bat` es el punto de entrada para Windows y llama internamente a `ru
 5. Verificar que `dotnet build Efac.sln --no-restore` muestra `Compilacion correcta`.
 6. Verificar que las pruebas API finalizan con `Superado: 11`.
 7. Verificar que la WebAPI queda disponible en `http://localhost:5100/`.
-8. Verificar que las pruebas Selenium finalizan con `Superado: 4`.
+8. Verificar que las pruebas Selenium finalizan con `Superado: 10`.
 9. Verificar que la suite completa finaliza correctamente.
 10. Verificar que el resumen final muestra todas las etapas en `OK`.
 11. Tomar captura de pantalla del resumen final antes de cerrar la ventana.
@@ -482,6 +482,12 @@ Pruebas Selenium:
 | UI-002 | Buscar por NIT | `input-search` y tabla de clientes. |
 | UI-003 | Alternar Natural/Juridica | `input-tipo-persona`, `input-nombres`, `input-apellidos`, `input-fecha-nacimiento`, `input-razon-social`. |
 | UI-004 | Calcular DV desde formulario | `input-nit`, `input-dv` y llamada a API de DV. |
+| UI-005 | Crear persona natural valida | Formulario completo: `nit`, `nombres`, `apellidos`, `fechaNacimiento`, datos de contacto y guardado. |
+| UI-006 | Crear persona juridica valida | `tipoPersona`, `razonSocial`, datos de contacto y guardado. |
+| UI-007 | Rechazar NIT duplicado | `input-nit` y `form-validation-summary`. |
+| UI-008 | Rechazar menor de edad | `input-fecha-nacimiento` y `form-validation-summary`. |
+| UI-009 | Editar cliente | Boton `Editar`, cambio de datos y persistencia. |
+| UI-010 | Eliminar cliente | Boton `Eliminar`, confirmacion del navegador y ausencia en tabla. |
 
 ### 6. Campos Validados
 

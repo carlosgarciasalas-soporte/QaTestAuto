@@ -8,7 +8,11 @@ public static class WebDriverFactory
     public static IWebDriver CreateChromeDriver()
     {
         var options = new ChromeOptions();
-        options.AddArgument("--headless=new");
+        if (SeleniumTestSettings.IsHeadless)
+        {
+            options.AddArgument("--headless=new");
+        }
+
         options.AddArgument("--window-size=1366,768");
         options.AddArgument("--disable-gpu");
         options.AddArgument("--disable-dev-shm-usage");

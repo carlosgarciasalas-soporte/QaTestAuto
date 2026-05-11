@@ -133,6 +133,7 @@ try {
 
     $env:EFAC_RUN_SELENIUM = "true"
     $env:EFAC_BASE_URL = $WebApiUrl
+    $env:EFAC_SELENIUM_HEADLESS = "false"
     Invoke-QACommand "Ejecutando pruebas Selenium" "dotnet" @(
         "test",
         "Efac.Tests.Selenium\Efac.Tests.Selenium.csproj",

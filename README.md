@@ -219,8 +219,8 @@ Incluye pruebas automatizadas para:
 Resultado actual de la suite:
 
 - `Efac.Tests.Api`: 11 pruebas automatizadas superadas.
-- `Efac.Tests.Selenium`: 4 pruebas superadas.
-- Total: 15 pruebas superadas.
+- `Efac.Tests.Selenium`: 10 pruebas superadas.
+- Total: 21 pruebas superadas.
 
 ### Etapa 3 - Automatizacion UI Con Selenium
 
@@ -229,7 +229,7 @@ Estado: implementada parcialmente.
 Incluye:
 
 - Page Object `ClientesPage` con esperas explicitas.
-- Fabrica `WebDriverFactory` preparada para Chrome headless.
+- Fabrica `WebDriverFactory` preparada para Chrome visible o headless.
 - Prueba de carga de pagina principal.
 - Prueba de busqueda por NIT.
 - Prueba de alternancia de campos entre persona natural y juridica.
@@ -237,7 +237,7 @@ Incluye:
 
 Resultado actual de la suite Selenium activada contra `http://localhost:5100/`:
 
-- `Efac.Tests.Selenium`: 4 pruebas superadas.
+- `Efac.Tests.Selenium`: 10 pruebas superadas.
 
 ## Implementacion De Las Pruebas Automatizadas
 
@@ -248,7 +248,7 @@ La automatizacion se implemento separando las pruebas del codigo productivo para
 | `Efac.Tests.Api` | Contiene pruebas automatizadas de API con xUnit, `WebApplicationFactory` y FluentAssertions. |
 | `Efac.Tests.Selenium` | Contiene pruebas E2E de interfaz con Selenium WebDriver. |
 | `Efac.Tests.Selenium/Pages/ClientesPage.cs` | Page Object con selectores y acciones reutilizables sobre la pantalla de clientes. |
-| `Efac.Tests.Selenium/Infrastructure/WebDriverFactory.cs` | Fabrica de navegador Chrome en modo headless. |
+| `Efac.Tests.Selenium/Infrastructure/WebDriverFactory.cs` | Fabrica de navegador Chrome en modo visible o headless segun variable de entorno. |
 | `run-qa-tests.bat` | Punto de entrada para ejecutar todo el ciclo QA desde Windows. |
 | `run-qa-tests.ps1` | Script auxiliar que controla logs, WebAPI, ejecucion de pruebas y evidencias. |
 | `test-assets/evidence/reports` | Carpeta donde se guardan logs y reportes TRX por ejecucion. |
@@ -260,12 +260,13 @@ La automatizacion se implemento separando las pruebas del codigo productivo para
 3. Se crearon datos de prueba para persona natural, persona juridica, NIT duplicado, menor de edad y actualizacion/eliminacion.
 4. Se creo el proyecto `Efac.Tests.Selenium` para validar flujos visibles de usuario sobre la interfaz Razor.
 5. Se agrego un Page Object `ClientesPage` para centralizar selectores como `input-search`, `btn-new-client`, `input-nit` e `input-dv`.
-6. Se configuro `WebDriverFactory` para levantar Chrome en modo headless.
+6. Se configuro `WebDriverFactory` para levantar Chrome en modo visible para evidencias o en modo headless para ejecuciones silenciosas.
 7. Se agregaron variables de entorno para activar Selenium solo cuando se requiera:
 
 ```powershell
 $env:EFAC_RUN_SELENIUM="true"
 $env:EFAC_BASE_URL="http://localhost:5100/"
+$env:EFAC_SELENIUM_HEADLESS="false"
 ```
 
 8. Se preparo `run-qa-tests.bat` como script de entrega. Este llama a `run-qa-tests.ps1`, ejecuta todas las fases y deja evidencia en pantalla y archivo.
@@ -311,6 +312,12 @@ Las pruebas Selenium se encuentran en `Efac.Tests.Selenium/Tests/ClientesUiSmoke
 | Busqueda por NIT | Escribe un NIT y verifica filtrado de tabla. | `input-search`, tabla de clientes |
 | Alternancia Natural/Juridica | Abre modal y cambia tipo de persona. | `btn-new-client`, `input-tipo-persona`, `input-nombres`, `input-apellidos`, `input-fecha-nacimiento`, `input-razon-social` |
 | Calculo de DV desde UI | Escribe NIT y espera el DV calculado por API. | `input-nit`, `input-dv` |
+| Crear persona natural | Llena formulario, guarda y valida aparicion en tabla. | `input-nit`, `input-nombres`, `input-apellidos`, `input-fecha-nacimiento`, `input-email`, `btn-save-client` |
+| Crear persona juridica | Llena razon social, guarda y valida aparicion en tabla. | `input-tipo-persona`, `input-razon-social`, `input-email`, `btn-save-client` |
+| NIT duplicado | Crea un cliente y vuelve a intentar guardar el mismo NIT. | `input-nit`, `form-validation-summary` |
+| Menor de edad | Intenta guardar natural menor de edad. | `input-fecha-nacimiento`, `form-validation-summary` |
+| Editar cliente | Abre accion Editar y modifica datos. | Boton `Editar`, `input-email`, `btn-save-client` |
+| Eliminar cliente | Abre accion Eliminar, confirma y valida ausencia en tabla. | Boton `Eliminar`, confirmacion del navegador, `input-search` |
 
 Flujo Selenium cubierto:
 
@@ -324,6 +331,10 @@ Flujo Selenium cubierto:
 8. Escribir un NIT.
 9. Esperar el calculo automatico del DV.
 10. Confirmar que `input-dv` contiene el valor esperado.
+11. Crear cliente natural y juridico desde UI.
+12. Validar errores por NIT duplicado y menor de edad.
+13. Editar un cliente creado desde UI.
+14. Eliminar un cliente creado desde UI.
 
 ## Ejecucion Del Proyecto
 
@@ -359,6 +370,18 @@ $env:EFAC_BASE_URL="http://localhost:5100/"
 dotnet test Efac.Tests.Selenium --no-build
 ```
 
+Para ver el navegador ejecutando los flujos, usar:
+
+```powershell
+$env:EFAC_SELENIUM_HEADLESS="false"
+```
+
+Para ejecutarlo oculto, usar:
+
+```powershell
+$env:EFAC_SELENIUM_HEADLESS="true"
+```
+
 Ejecutar ciclo QA automatico completo con evidencias:
 
 ```powershell
@@ -375,6 +398,7 @@ El script realiza:
 - Ejecucion de la suite completa.
 - Cierre automatico de la WebAPI.
 - Generacion de log y reportes TRX por ejecucion.
+- Ejecuta Selenium en Chrome visible para permitir capturas del navegador llenando formularios.
 - Mantiene la ventana abierta al finalizar para permitir capturas de pantalla.
 
 Cada ejecucion crea una carpeta independiente:
@@ -404,7 +428,7 @@ webapi.log
 3. Tomar captura del inicio de la ejecucion donde se vea el encabezado `EFAC - EJECUCION QA AUTOMATICA`.
 4. Tomar captura de la seccion de compilacion donde se vea `Compilacion correcta`.
 5. Tomar captura del resultado API donde se vea `Superado: 11`.
-6. Tomar captura del resultado Selenium donde se vea `Superado: 4`.
+6. Tomar captura del resultado Selenium donde se vea `Superado: 10`.
 7. Tomar captura del resumen final con `Restore: OK`, `Build: OK`, `Pruebas API: OK`, `Pruebas Selenium: OK` y `Suite completa: OK`.
 8. Abrir la carpeta indicada en `Reportes TRX` y tomar captura de los archivos generados.
 9. Cerrar la ventana manualmente presionando una tecla cuando ya se hayan tomado las capturas.
@@ -422,16 +446,22 @@ Estas carpetas estan preparadas para capturas de pantalla, reportes y registros 
 
 ## Roadmap Tecnico
 
-### Etapa 4 - Flujos UI CRUD Con Selenium
+### Etapa 5 - Flujos UI CRUD Con Selenium Visible
 
 Casos recomendados:
+
+Estado: implementada.
+
+Incluye:
 
 - Creacion de cliente natural valido.
 - Creacion de cliente juridico valido.
 - Mensaje de error por menor de edad.
-- Busqueda por NIT o nombre.
+- Mensaje de error por NIT duplicado.
+- Busqueda por NIT.
 - Edicion de cliente.
 - Eliminacion de cliente.
+- Chrome visible configurable con `EFAC_SELENIUM_HEADLESS=false`.
 
 ### Etapa 4 - Evidencias Y Reportes
 

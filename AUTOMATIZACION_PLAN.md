@@ -57,6 +57,7 @@ Ejecutar Selenium contra la aplicacion local:
 dotnet run --project Efac.WebAPI --launch-profile http
 $env:EFAC_RUN_SELENIUM="true"
 $env:EFAC_BASE_URL="http://localhost:5100/"
+$env:EFAC_SELENIUM_HEADLESS="false"
 dotnet test Efac.Tests.Selenium --no-build
 ```
 
@@ -92,18 +93,21 @@ Estado: implementada parcialmente.
 Incluye:
 
 - Page Object `ClientesPage` con esperas explicitas.
-- Fabrica `WebDriverFactory` preparada para Chrome headless.
+- Fabrica `WebDriverFactory` preparada para Chrome visible o headless.
 - Prueba de carga de pagina principal.
 - Prueba de busqueda por NIT.
 - Prueba de alternancia de campos Natural/Juridica.
 - Prueba de calculo de DV desde la UI usando la API.
+- Prueba de creacion de persona natural desde UI.
+- Prueba de creacion de persona juridica desde UI.
+- Prueba de rechazo por NIT duplicado desde UI.
+- Prueba de rechazo por menor de edad desde UI.
+- Prueba de edicion de cliente desde UI.
+- Prueba de eliminacion de cliente desde UI.
 
-Pendiente para la siguiente etapa:
+Resultado actual:
 
-- Creacion de cliente desde la UI.
-- Mensaje de error por menor de edad.
-- Edicion de cliente.
-- Eliminacion de cliente.
+- `Efac.Tests.Selenium`: 10 pruebas superadas.
 
 ## Criterio de avance
 
@@ -128,6 +132,7 @@ Incluye:
 - Arranque y cierre automatico de la WebAPI local.
 - Pausa final en `run-qa-tests.bat` para que el usuario tome capturas antes de cerrar la ventana.
 - Documentacion de flujo automatico, campos probados y evidencias esperadas.
+- Selenium visible por defecto en el script de entrega mediante `EFAC_SELENIUM_HEADLESS=false`.
 
 ## Paso a paso para ejecutar el ciclo automatico
 
@@ -189,6 +194,12 @@ UI Selenium:
 - Apertura de modal de cliente.
 - Alternancia de campos entre Natural y Juridica.
 - Calculo de DV desde el formulario.
+- Creacion de persona natural.
+- Creacion de persona juridica.
+- Validacion de NIT duplicado.
+- Validacion de menor de edad.
+- Edicion de cliente.
+- Eliminacion de cliente.
 
 Campos principales validados:
 

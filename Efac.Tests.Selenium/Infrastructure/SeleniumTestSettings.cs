@@ -7,4 +7,7 @@ public static class SeleniumTestSettings
 
     public static bool IsEnabled =>
         string.Equals(Environment.GetEnvironmentVariable("EFAC_RUN_SELENIUM"), "true", StringComparison.OrdinalIgnoreCase);
+
+    public static bool IsHeadless =>
+        !string.Equals(Environment.GetEnvironmentVariable("EFAC_SELENIUM_HEADLESS"), "false", StringComparison.OrdinalIgnoreCase);
 }
