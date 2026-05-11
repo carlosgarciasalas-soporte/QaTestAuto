@@ -1,3 +1,15 @@
+<div align="center">
+
+# AA2 Taller: Automatización de pruebas con Selenium
+
+**Carlos Alberto García Salas**  
+**Universidad Tecnológica del Oriente**  
+**Pruebas Y Calidad De Software**
+
+</div>
+
+---
+
 # EFAC QA Testing y Automatizacion
 
 ## Descripcion General
