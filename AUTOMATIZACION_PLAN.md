@@ -60,6 +60,14 @@ $env:EFAC_BASE_URL="http://localhost:5100/"
 dotnet test Efac.Tests.Selenium --no-build
 ```
 
+Ejecucion automatizada para entrega y evidencias:
+
+```powershell
+.\run-qa-tests.bat
+```
+
+El script crea una carpeta por ciclo en `test-assets/evidence/reports`, muestra el avance en pantalla y guarda el archivo `qa-execution.log` junto con reportes TRX.
+
 ## Etapa 2 - Pruebas API
 
 Estado: implementada.
@@ -105,3 +113,94 @@ Cada etapa debe cerrar con:
 - Pruebas automatizadas ejecutadas.
 - Evidencia de resultado.
 - Actualizacion de este plan.
+
+## Etapa 4 - Evidencias automatizadas
+
+Estado: implementada.
+
+Incluye:
+
+- Script `run-qa-tests.bat` como punto de entrada para Windows.
+- Script auxiliar `run-qa-tests.ps1` para controlar logs, procesos y errores.
+- Carpeta de evidencia independiente por ejecucion.
+- Log de consola persistido en `qa-execution.log`.
+- Reportes TRX para pruebas API, Selenium y suite completa.
+- Arranque y cierre automatico de la WebAPI local.
+- Pausa final en `run-qa-tests.bat` para que el usuario tome capturas antes de cerrar la ventana.
+- Documentacion de flujo automatico, campos probados y evidencias esperadas.
+
+## Paso a paso para ejecutar el ciclo automatico
+
+1. Abrir CMD o PowerShell en la raiz del proyecto.
+2. Ejecutar:
+
+```powershell
+.\run-qa-tests.bat
+```
+
+3. Esperar que el script muestre el encabezado `EFAC - EJECUCION QA AUTOMATICA`.
+4. Confirmar en pantalla las etapas:
+   - `Restaurando paquetes NuGet`
+   - `Compilando solucion`
+   - `Ejecutando pruebas API`
+   - `Levantando WebAPI`
+   - `Ejecutando pruebas Selenium`
+   - `Ejecutando suite completa`
+5. Tomar capturas de pantalla de los resultados relevantes.
+6. Revisar la ruta indicada en `Reportes TRX`.
+7. Presionar una tecla para cerrar la ventana cuando ya se hayan tomado las evidencias.
+
+## Evidencias automaticas esperadas
+
+Cada ejecucion crea una carpeta con formato:
+
+```text
+test-assets/evidence/reports/yyyyMMdd_HHmmss_qa-run
+```
+
+Contenido esperado:
+
+- `qa-execution.log`: log completo visible tambien en consola.
+- `api-tests.trx`: reporte de pruebas API.
+- `selenium-tests.trx`: reporte de pruebas Selenium.
+- Reportes `.trx` adicionales de la suite completa.
+- `webapi.log`: salida de la WebAPI durante el ciclo automatico.
+
+## Cobertura automatizada documentada
+
+API:
+
+- Listado de clientes.
+- Consulta de cliente inexistente.
+- Calculo y normalizacion de DV.
+- Rechazo de NIT invalido.
+- Creacion de persona natural valida.
+- Rechazo de NIT duplicado.
+- Rechazo de menor de edad.
+- Rechazo de natural sin fecha de nacimiento.
+- Rechazo de juridica sin razon social.
+- Actualizacion de cliente.
+- Eliminacion de cliente.
+
+UI Selenium:
+
+- Carga de pantalla principal.
+- Busqueda por NIT.
+- Apertura de modal de cliente.
+- Alternancia de campos entre Natural y Juridica.
+- Calculo de DV desde el formulario.
+
+Campos principales validados:
+
+- `tipoPersona`
+- `nit`
+- `dv`
+- `nombres`
+- `apellidos`
+- `fechaNacimiento`
+- `razonSocial`
+- `email`
+- `telefono`
+- `direccion`
+- `ciudadCodigoMunicipio`
+- `responsabilidadFiscal`

@@ -239,6 +239,92 @@ Resultado actual de la suite Selenium activada contra `http://localhost:5100/`:
 
 - `Efac.Tests.Selenium`: 4 pruebas superadas.
 
+## Implementacion De Las Pruebas Automatizadas
+
+La automatizacion se implemento separando las pruebas del codigo productivo para mantener trazabilidad y facilitar la entrega de evidencias.
+
+| Componente | Proposito |
+|---|---|
+| `Efac.Tests.Api` | Contiene pruebas automatizadas de API con xUnit, `WebApplicationFactory` y FluentAssertions. |
+| `Efac.Tests.Selenium` | Contiene pruebas E2E de interfaz con Selenium WebDriver. |
+| `Efac.Tests.Selenium/Pages/ClientesPage.cs` | Page Object con selectores y acciones reutilizables sobre la pantalla de clientes. |
+| `Efac.Tests.Selenium/Infrastructure/WebDriverFactory.cs` | Fabrica de navegador Chrome en modo headless. |
+| `run-qa-tests.bat` | Punto de entrada para ejecutar todo el ciclo QA desde Windows. |
+| `run-qa-tests.ps1` | Script auxiliar que controla logs, WebAPI, ejecucion de pruebas y evidencias. |
+| `test-assets/evidence/reports` | Carpeta donde se guardan logs y reportes TRX por ejecucion. |
+
+### Paso A Paso De Implementacion
+
+1. Se creo el proyecto `Efac.Tests.Api` para validar endpoints, codigos HTTP, contratos JSON y reglas de negocio desde la capa API.
+2. Se agrego `WebApplicationFactory<Program>` para ejecutar la WebAPI en memoria durante las pruebas API, sin depender de navegador.
+3. Se crearon datos de prueba para persona natural, persona juridica, NIT duplicado, menor de edad y actualizacion/eliminacion.
+4. Se creo el proyecto `Efac.Tests.Selenium` para validar flujos visibles de usuario sobre la interfaz Razor.
+5. Se agrego un Page Object `ClientesPage` para centralizar selectores como `input-search`, `btn-new-client`, `input-nit` e `input-dv`.
+6. Se configuro `WebDriverFactory` para levantar Chrome en modo headless.
+7. Se agregaron variables de entorno para activar Selenium solo cuando se requiera:
+
+```powershell
+$env:EFAC_RUN_SELENIUM="true"
+$env:EFAC_BASE_URL="http://localhost:5100/"
+```
+
+8. Se preparo `run-qa-tests.bat` como script de entrega. Este llama a `run-qa-tests.ps1`, ejecuta todas las fases y deja evidencia en pantalla y archivo.
+
+## Que Se Prueba
+
+### Pruebas API Automatizadas
+
+Las pruebas API se encuentran en `Efac.Tests.Api/ClientesApiTests.cs`.
+
+| Caso | Endpoint | Validacion principal |
+|---|---|---|
+| Listar clientes | `GET /api/clientes` | Retorna `200 OK` y datos semilla. |
+| Cliente inexistente | `GET /api/clientes/{id}` | Retorna `404 Not Found`. |
+| Calcular DV | `GET /api/clientes/calcular-dv/{nit}` | Normaliza NIT y calcula digito de verificacion. |
+| NIT invalido | `GET /api/clientes/calcular-dv/ABC` | Retorna `400 Bad Request`. |
+| Crear natural valido | `POST /api/clientes` | Retorna `201 Created`. |
+| NIT duplicado | `POST /api/clientes` | Retorna `409 Conflict`. |
+| Menor de edad | `POST /api/clientes` | Retorna `400 Bad Request`. |
+| Natural sin fecha | `POST /api/clientes` | Retorna `400 Bad Request`. |
+| Juridica sin razon social | `POST /api/clientes` | Retorna `400 Bad Request`. |
+| Actualizar cliente | `PUT /api/clientes/{id}` | Retorna `200 OK` y datos actualizados. |
+| Eliminar cliente | `DELETE /api/clientes/{id}` | Retorna `204 No Content` y luego `404 Not Found`. |
+
+Campos validados por las pruebas API:
+
+- `tipoPersona`: diferencia persona natural y juridica.
+- `nit`: normalizacion, duplicidad y persistencia.
+- `dv`: calculo DIAN modulo 11.
+- `nombres` y `apellidos`: requeridos para persona natural.
+- `razonSocial`: requerida para persona juridica y no persistida para natural.
+- `fechaNacimiento`: requerida para natural y usada para validar mayoria de edad.
+- `email`, `telefono`, `direccion`, `ciudadCodigoMunicipio`: persistencia en creacion y actualizacion.
+- `responsabilidadFiscal`: persistencia del tipo de responsabilidad.
+
+### Pruebas Selenium Automatizadas
+
+Las pruebas Selenium se encuentran en `Efac.Tests.Selenium/Tests/ClientesUiSmokeTests.cs`.
+
+| Caso | Flujo validado | Controles principales |
+|---|---|---|
+| Carga inicial | Abre `http://localhost:5100/` y valida controles principales. | `input-search`, `btn-new-client` |
+| Busqueda por NIT | Escribe un NIT y verifica filtrado de tabla. | `input-search`, tabla de clientes |
+| Alternancia Natural/Juridica | Abre modal y cambia tipo de persona. | `btn-new-client`, `input-tipo-persona`, `input-nombres`, `input-apellidos`, `input-fecha-nacimiento`, `input-razon-social` |
+| Calculo de DV desde UI | Escribe NIT y espera el DV calculado por API. | `input-nit`, `input-dv` |
+
+Flujo Selenium cubierto:
+
+1. Abrir la pagina principal.
+2. Confirmar que la pantalla de clientes carga.
+3. Buscar cliente por NIT.
+4. Abrir el formulario de nuevo cliente.
+5. Validar campos habilitados para persona natural.
+6. Cambiar a persona juridica.
+7. Validar que se deshabilitan campos naturales y se habilita razon social.
+8. Escribir un NIT.
+9. Esperar el calculo automatico del DV.
+10. Confirmar que `input-dv` contiene el valor esperado.
+
 ## Ejecucion Del Proyecto
 
 Restaurar dependencias:
@@ -272,6 +358,56 @@ $env:EFAC_RUN_SELENIUM="true"
 $env:EFAC_BASE_URL="http://localhost:5100/"
 dotnet test Efac.Tests.Selenium --no-build
 ```
+
+Ejecutar ciclo QA automatico completo con evidencias:
+
+```powershell
+.\run-qa-tests.bat
+```
+
+El script realiza:
+
+- Restauracion de paquetes.
+- Compilacion de la solucion.
+- Ejecucion de pruebas API.
+- Levantamiento automatico de la WebAPI en `http://localhost:5100/`.
+- Ejecucion de pruebas Selenium.
+- Ejecucion de la suite completa.
+- Cierre automatico de la WebAPI.
+- Generacion de log y reportes TRX por ejecucion.
+- Mantiene la ventana abierta al finalizar para permitir capturas de pantalla.
+
+Cada ejecucion crea una carpeta independiente:
+
+```text
+test-assets/evidence/reports/yyyyMMdd_HHmmss_qa-run
+```
+
+Dentro de esa carpeta quedan evidencias como:
+
+```text
+qa-execution.log
+api-tests.trx
+selenium-tests.trx
+webapi.log
+```
+
+### Flujo Recomendado Para Capturas De Entrega
+
+1. Abrir PowerShell o CMD en la raiz del proyecto.
+2. Ejecutar:
+
+```powershell
+.\run-qa-tests.bat
+```
+
+3. Tomar captura del inicio de la ejecucion donde se vea el encabezado `EFAC - EJECUCION QA AUTOMATICA`.
+4. Tomar captura de la seccion de compilacion donde se vea `Compilacion correcta`.
+5. Tomar captura del resultado API donde se vea `Superado: 11`.
+6. Tomar captura del resultado Selenium donde se vea `Superado: 4`.
+7. Tomar captura del resumen final con `Restore: OK`, `Build: OK`, `Pruebas API: OK`, `Pruebas Selenium: OK` y `Suite completa: OK`.
+8. Abrir la carpeta indicada en `Reportes TRX` y tomar captura de los archivos generados.
+9. Cerrar la ventana manualmente presionando una tecla cuando ya se hayan tomado las capturas.
 
 ## Evidencias
 

@@ -263,7 +263,7 @@ Respuesta esperada:
 }
 ```
 
-Codigo esperado: `409 Conflict`.
+Codigo esperado: `400 Bad Request`.
 
 ---
 
@@ -333,7 +333,7 @@ Respuesta esperada:
 }
 ```
 
-Codigo esperado: `400 Bad Request`.
+Codigo esperado: `409 Conflict`.
 
 ---
 
@@ -383,6 +383,122 @@ Codigo esperado: `400 Bad Request`.
 | EV-006 | Captura de interfaz con Persona Juridica y razon social visible. | Pendiente |
 | EV-007 | Captura de busqueda por NIT o nombre en la tabla principal. | Pendiente |
 | EV-008 | Captura de eliminacion con confirmacion previa. | Pendiente |
+| EV-009 | Captura de inicio del script `run-qa-tests.bat`. | Pendiente |
+| EV-010 | Captura de compilacion correcta desde consola. | Pendiente |
+| EV-011 | Captura de pruebas API superadas: `Superado: 11`. | Pendiente |
+| EV-012 | Captura de pruebas Selenium superadas: `Superado: 4`. | Pendiente |
+| EV-013 | Captura del resumen final del script con todas las etapas en `OK`. | Pendiente |
+| EV-014 | Captura de carpeta generada en `test-assets/evidence/reports`. | Pendiente |
+| EV-015 | Archivo `qa-execution.log` generado por el script. | Pendiente |
+| EV-016 | Archivos `.trx` generados por `dotnet test`. | Pendiente |
+
+---
+
+## C. Guia De Evidencias De Pruebas Automaticas
+
+### 1. Objetivo
+
+Demostrar que el proyecto ejecuta un ciclo automatico de pruebas que cubre compilacion, API, interfaz web con Selenium, reportes y log de ejecucion.
+
+### 2. Script De Ejecucion
+
+El ciclo automatico se ejecuta desde la raiz del proyecto con:
+
+```powershell
+.\run-qa-tests.bat
+```
+
+El archivo `.bat` es el punto de entrada para Windows y llama internamente a `run-qa-tests.ps1`, que se encarga de:
+
+- Crear una carpeta de evidencia por ejecucion.
+- Restaurar paquetes NuGet.
+- Compilar la solucion.
+- Ejecutar pruebas API.
+- Levantar la WebAPI en `http://localhost:5100/`.
+- Esperar hasta que la WebAPI responda.
+- Activar variables de entorno de Selenium.
+- Ejecutar pruebas Selenium.
+- Ejecutar la suite completa.
+- Cerrar la WebAPI.
+- Guardar log de consola y reportes TRX.
+- Dejar la ventana abierta hasta que el usuario presione una tecla.
+
+### 3. Flujo De Ejecucion Esperado
+
+1. Abrir CMD o PowerShell en la raiz del proyecto.
+2. Ejecutar `.\run-qa-tests.bat`.
+3. Verificar que aparece el encabezado `EFAC - EJECUCION QA AUTOMATICA`.
+4. Verificar que `dotnet restore Efac.sln` finaliza correctamente.
+5. Verificar que `dotnet build Efac.sln --no-restore` muestra `Compilacion correcta`.
+6. Verificar que las pruebas API finalizan con `Superado: 11`.
+7. Verificar que la WebAPI queda disponible en `http://localhost:5100/`.
+8. Verificar que las pruebas Selenium finalizan con `Superado: 4`.
+9. Verificar que la suite completa finaliza correctamente.
+10. Verificar que el resumen final muestra todas las etapas en `OK`.
+11. Tomar captura de pantalla del resumen final antes de cerrar la ventana.
+12. Presionar una tecla para cerrar la ventana.
+
+### 4. Evidencia Generada Por El Script
+
+Cada ejecucion crea una carpeta con formato:
+
+```text
+test-assets/evidence/reports/yyyyMMdd_HHmmss_qa-run
+```
+
+Archivos esperados:
+
+| Archivo | Uso como evidencia |
+|---|---|
+| `qa-execution.log` | Registro completo de comandos, resultados y resumen. |
+| `api-tests.trx` | Reporte formal de pruebas API. |
+| `selenium-tests.trx` | Reporte formal de pruebas Selenium. |
+| `*.trx` adicionales | Reportes de la suite completa cuando se ejecutan varios proyectos. |
+| `webapi.log` | Salida de la WebAPI durante la ejecucion automatizada. |
+
+### 5. Casos Automaticos Cubiertos
+
+Pruebas API:
+
+| ID | Caso automatico | Campo o regla validada |
+|---|---|---|
+| API-001 | Listar clientes | Disponibilidad de `GET /api/clientes` y datos semilla. |
+| API-002 | Consultar cliente inexistente | Manejo de `id` no encontrado. |
+| API-003 | Calcular DV con NIT formateado | `nit` normalizado y `dv`. |
+| API-004 | Rechazar NIT invalido | Validacion de `nit`. |
+| API-005 | Crear persona natural valida | `tipoPersona`, `nit`, `nombres`, `apellidos`, `fechaNacimiento`, `email`. |
+| API-006 | Rechazar NIT duplicado | Regla de unicidad de `nit`. |
+| API-007 | Rechazar menor de edad | Regla de mayoria de edad sobre `fechaNacimiento`. |
+| API-008 | Rechazar natural sin fecha | Obligatoriedad de `fechaNacimiento`. |
+| API-009 | Rechazar juridica sin razon social | Obligatoriedad de `razonSocial`. |
+| API-010 | Actualizar cliente | Persistencia de cambios en datos editables. |
+| API-011 | Eliminar cliente | Eliminacion y posterior `404 Not Found`. |
+
+Pruebas Selenium:
+
+| ID | Caso automatico | Campo o control validado |
+|---|---|---|
+| UI-001 | Cargar pagina principal | `input-search`, `btn-new-client`, titulo de pagina. |
+| UI-002 | Buscar por NIT | `input-search` y tabla de clientes. |
+| UI-003 | Alternar Natural/Juridica | `input-tipo-persona`, `input-nombres`, `input-apellidos`, `input-fecha-nacimiento`, `input-razon-social`. |
+| UI-004 | Calcular DV desde formulario | `input-nit`, `input-dv` y llamada a API de DV. |
+
+### 6. Campos Validados
+
+| Campo | Tipo de prueba | Validacion |
+|---|---|---|
+| `tipoPersona` | API/UI | Define si el cliente es natural o juridico. |
+| `nit` | API/UI | Normalizacion, duplicidad, busqueda y calculo de DV. |
+| `dv` | API/UI | Digito de verificacion calculado por algoritmo DIAN. |
+| `nombres` | API/UI | Obligatorio y visible para persona natural. |
+| `apellidos` | API/UI | Obligatorio y visible para persona natural. |
+| `fechaNacimiento` | API/UI | Obligatoria para natural y usada para validar mayoria de edad. |
+| `razonSocial` | API/UI | Obligatoria y visible para persona juridica. |
+| `email` | API | Persistencia al crear y actualizar. |
+| `telefono` | API | Persistencia al crear y actualizar. |
+| `direccion` | API | Persistencia al crear y actualizar. |
+| `ciudadCodigoMunicipio` | API | Persistencia del municipio. |
+| `responsabilidadFiscal` | API | Persistencia de responsabilidad fiscal. |
 
 ---
 
