@@ -517,19 +517,6 @@ def build_story():
             ]
         )
     )
-    story.append(heading("8.3 Recomendaciones", 2))
-    story.extend(
-        bullets(
-            [
-                "Conservar el PDF, el README y la matriz como paquete de entrega.",
-                "Ejecutar run-qa-tests.bat antes de cada entrega formal.",
-                "Guardar capturas finales en test-assets/evidence/screenshots si el docente las solicita.",
-                "Agregar reportes HTML en una etapa futura si se requiere lectura mas amigable que TRX.",
-                "Separar frontend y backend si se desea publicar una version web en Vercel.",
-            ]
-        )
-    )
-
     story.append(heading("9. Conclusiones"))
     story.append(
         p(

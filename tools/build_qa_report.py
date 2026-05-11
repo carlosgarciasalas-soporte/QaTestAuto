@@ -477,18 +477,6 @@ def build_document() -> Document:
         ],
     )
 
-    document.add_heading("8.3 Recomendaciones", level=2)
-    add_bullets(
-        document,
-        [
-            "Conservar el PDF, el README y la matriz como paquete de entrega.",
-            "Ejecutar run-qa-tests.bat antes de cada entrega formal.",
-            "Guardar capturas finales en test-assets/evidence/screenshots si el docente las solicita.",
-            "Agregar reportes HTML en una etapa futura si se requiere lectura mas amigable que TRX.",
-            "Separar frontend y backend si se desea publicar una version web en Vercel.",
-        ],
-    )
-
     document.add_heading("9. Conclusiones", level=1)
     document.add_paragraph(
         "El proyecto EFAC presenta una base tecnica consistente para pruebas y calidad de software. "
