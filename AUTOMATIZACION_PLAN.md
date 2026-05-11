@@ -77,16 +77,23 @@ Incluye:
 - Actualizacion valida retorna `200 OK`.
 - Eliminacion retorna `204 No Content` y el cliente queda inaccesible.
 
-## Etapa 3 - Selenium recomendado
+## Etapa 3 - Selenium
 
-- Carga de pagina principal.
-- Apertura del modal Nuevo Cliente.
-- Validacion de campos para persona natural.
-- Validacion de campos para persona juridica.
-- Calculo de DV desde la UI.
+Estado: implementada parcialmente.
+
+Incluye:
+
+- Page Object `ClientesPage` con esperas explicitas.
+- Fabrica `WebDriverFactory` preparada para Chrome headless.
+- Prueba de carga de pagina principal.
+- Prueba de busqueda por NIT.
+- Prueba de alternancia de campos Natural/Juridica.
+- Prueba de calculo de DV desde la UI usando la API.
+
+Pendiente para la siguiente etapa:
+
 - Creacion de cliente desde la UI.
 - Mensaje de error por menor de edad.
-- Busqueda por NIT o nombre.
 - Edicion de cliente.
 - Eliminacion de cliente.
 

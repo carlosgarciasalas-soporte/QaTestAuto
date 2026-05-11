@@ -15,7 +15,7 @@ El objetivo funcional principal es administrar clientes bajo reglas de negocio a
 - Persistencia: Entity Framework Core InMemory.
 - Documentacion y pruebas manuales de API: Swagger.
 - Automatizacion API: xUnit, WebApplicationFactory y FluentAssertions.
-- Automatizacion UI: Selenium WebDriver con xUnit.
+- Automatizacion UI: Selenium WebDriver, Selenium Support y xUnit.
 
 ## Arquitectura Del Proyecto
 
@@ -219,8 +219,25 @@ Incluye pruebas automatizadas para:
 Resultado actual de la suite:
 
 - `Efac.Tests.Api`: 11 pruebas automatizadas superadas.
-- `Efac.Tests.Selenium`: 1 prueba smoke superada.
-- Total: 12 pruebas superadas.
+- `Efac.Tests.Selenium`: 4 pruebas superadas.
+- Total: 15 pruebas superadas.
+
+### Etapa 3 - Automatizacion UI Con Selenium
+
+Estado: implementada parcialmente.
+
+Incluye:
+
+- Page Object `ClientesPage` con esperas explicitas.
+- Fabrica `WebDriverFactory` preparada para Chrome headless.
+- Prueba de carga de pagina principal.
+- Prueba de busqueda por NIT.
+- Prueba de alternancia de campos entre persona natural y juridica.
+- Prueba de calculo de DV desde la UI.
+
+Resultado actual de la suite Selenium activada contra `http://localhost:5100/`:
+
+- `Efac.Tests.Selenium`: 4 pruebas superadas.
 
 ## Ejecucion Del Proyecto
 
@@ -269,15 +286,10 @@ Estas carpetas estan preparadas para capturas de pantalla, reportes y registros 
 
 ## Roadmap Tecnico
 
-### Etapa 3 - Automatizacion UI Con Selenium
+### Etapa 4 - Flujos UI CRUD Con Selenium
 
 Casos recomendados:
 
-- Carga de pagina principal.
-- Apertura del modal Nuevo Cliente.
-- Validacion de campos para persona natural.
-- Validacion de campos para persona juridica.
-- Calculo de DV desde la UI.
 - Creacion de cliente natural valido.
 - Creacion de cliente juridico valido.
 - Mensaje de error por menor de edad.
